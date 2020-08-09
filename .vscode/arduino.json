@@ -1,4 +1,5 @@
 {
     "board": "arduino:avr:uno",
-    "sketch": "BTSetup.ino"
+    "sketch": "BTDebug\\BTDebug.ino",
+    "port": "COM3"
 }
