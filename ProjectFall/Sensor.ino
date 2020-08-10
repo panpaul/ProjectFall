@@ -9,7 +9,7 @@ void WireSetup()
     Wire.endTransmission(true);
 
     OFF_TIMES = 100;
-    OFF_DROP = 20;
+    OFF_DROP = 5;
     OFF_DELAY = 10;
 
     ACC_X_OFF = ACC_Y_OFF = ACC_Z_OFF = GYR_X_OFF = GYR_Y_OFF = GYR_Z_OFF = 0;
@@ -70,11 +70,8 @@ void CalcOffset()
         z += GYR_Z_R;
         delay(OFF_DELAY);
     }
+
     GYR_X_OFF = -(x / OFF_TIMES);
     GYR_Y_OFF = -(y / OFF_TIMES);
     GYR_Z_OFF = -(z / OFF_TIMES);
-
-    Serial.print("[Sensor]GYR_X offset sets to "), Serial.println(GYR_X_OFF);
-    Serial.print("[Sensor]GYR_Y offset sets to "), Serial.println(GYR_Y_OFF);
-    Serial.print("[Sensor]GYR_Z offset sets to "), Serial.println(GYR_Z_OFF);
 }
