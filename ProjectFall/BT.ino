@@ -7,13 +7,41 @@ void BTSetup()
 
 void BTRead()
 {
-    Serial.print("[Bluetooth]Receiving Data:");
-    while (BT.available())
+    /*
+        数据格式 "<" + "command" + ">"
+    */
+    static bool receving = false;
+    static byte idx = 0;
+    char ch;
+
+    while (BT.available() && newBuffer == false)
     {
         ch = BT.read();
-        Serial.print(ch);
+
+        if (receving)
+        {
+            if (ch != '>')
+            {
+                buffer[idx] = ch;
+                idx++;
+                if (idx >= numChars)
+                {
+                    idx = numChars - 1;
+                }
+            }
+            else
+            {
+                buffer[idx] = '\0';
+                receving = false;
+                idx = 0;
+                newBuffer = true;
+            }
+        }
+        else if (ch == '<')
+        {
+            receving = true;
+        }
     }
-    Serial.println("");
 }
 
 void BTConfig()

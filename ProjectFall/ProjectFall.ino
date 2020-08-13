@@ -1,35 +1,104 @@
 #include "Sensor.h"
 #include "BT.h"
 
-void Print2BT();     // 蓝牙输出
-void Print2Serial(); // 串口输出
+#define PRINT2SERIAL
+
+// 输出
+void Print2BT();
+void Print2Serial();
+
+// 运行状态
+const byte COMMAND_START = 0;
+const byte COMMAND_STOP = 1;
+const byte COMMAND_RECALC = 2;
+// 当前运行状态
+byte currentStatus = COMMAND_STOP;
+
+// 指令解析
+void ParseBuffer();
 
 void setup()
 {
     pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, LOW);
 
     Serial.begin(9600);
 
-    WireSetup(); // 传感器初始化
-    BTSetup();   // 蓝牙初始化
+    WireSetup();
+    BTSetup();
 
+    digitalWrite(LED_BUILTIN, HIGH);
     delay(1000);
-    CalcOffset(); // 计算GYR的偏移量
+    CalcOffset();
+    digitalWrite(LED_BUILTIN, LOW);
 
     Serial.println("[Setup]finished!");
-    digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void loop()
 {
-    ReadData();  // 读取原始数据
-    Calibrate(); // 校准
-    Print2BT();  // 输出到蓝牙
+    BTRead();
+    ParseBuffer();
 
-    //Print2Serial(); // 输出到串口
+    switch (currentStatus)
+    {
+    case COMMAND_START: // 正常工作
+        digitalWrite(LED_BUILTIN, HIGH);
+        ReadData();
+        Calibrate();
+        Print2BT();
 
-    delay(20);
+#ifdef PRINT2SERIAL
+        Print2Serial();
+#endif
+
+        delay(20);
+        break;
+
+    case COMMAND_STOP: // 停止工作
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(1000);
+        break;
+
+    case COMMAND_RECALC: // 重新校准
+        CalcOffset();
+        currentStatus = COMMAND_START;
+        delay(20);
+        break;
+
+    default: // 一定是出错了~
+        delay(1000);
+        break;
+    }
+}
+
+void ParseBuffer()
+{
+    if (!newBuffer)
+        return;
+
+    if (strcmp(buffer, "start") == 0)
+    {
+        Serial.println("[Bluetooth]Received Start command");
+        currentStatus = COMMAND_START;
+        newBuffer = false;
+        return;
+    }
+
+    if (strcmp(buffer, "stop") == 0)
+    {
+        Serial.println("[Bluetooth]Received Stop command");
+        currentStatus = COMMAND_STOP;
+        newBuffer = false;
+        return;
+    }
+
+    if (strcmp(buffer, "calibrate") == 0)
+    {
+        Serial.println("[Bluetooth]Received Calibrate command");
+        currentStatus = COMMAND_RECALC;
+        newBuffer = false;
+        return;
+    }
 }
 
 void Print2BT()

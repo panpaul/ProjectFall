@@ -9,10 +9,12 @@
 */
 SoftwareSerial BT(10, 11);
 
-char ch; // 缓存块
+const byte numChars = 16;
+char buffer[numChars]; // 缓存块
+bool newBuffer = false;
 
-void BTSetup();  // 蓝牙初始化
-void BTRead();   // 读取蓝牙数据
+void BTSetup();	 // 蓝牙初始化
+void BTRead();	 // 读取蓝牙数据
 void BTConfig(); // 蓝牙配置
 
 #endif
