@@ -1,7 +1,7 @@
 #include "Sensor.h"
 #include "BT.h"
 
-#define PRINT2SERIAL
+//#define PRINT2SERIAL
 
 // 输出
 void Print2BT();
@@ -16,6 +16,8 @@ byte currentStatus = COMMAND_STOP;
 
 // 指令解析
 void ParseBuffer();
+
+void blink();
 
 void setup()
 {
@@ -60,7 +62,10 @@ void loop()
         break;
 
     case COMMAND_RECALC: // 重新校准
+        blink();
+        digitalWrite(LED_BUILTIN, HIGH);
         CalcOffset();
+        blink();
         currentStatus = COMMAND_START;
         delay(20);
         break;
@@ -103,6 +108,8 @@ void ParseBuffer()
 
 void Print2BT()
 {
+    BT.print("<");
+
     BT.print(ACC_X), BT.print(" ");
     BT.print(ACC_Y), BT.print(" ");
     BT.print(ACC_Z), BT.print(" ");
@@ -111,7 +118,9 @@ void Print2BT()
     BT.print(GYR_Y), BT.print(" ");
     BT.print(GYR_Z), BT.print(" ");
 
-    BT.println(TMP_C);
+    BT.print(TMP_C);
+
+    BT.print(">");
 }
 
 void Print2Serial()
@@ -125,4 +134,16 @@ void Print2Serial()
     Serial.print(GYR_Z), Serial.print(" ");
 
     Serial.println(TMP_C);
+}
+
+void blink()
+{
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(200);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(200);
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(200);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(200);
 }

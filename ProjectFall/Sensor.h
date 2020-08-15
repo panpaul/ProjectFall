@@ -4,6 +4,7 @@
 #include <Wire.h>
 
 const int MPU = 0x68; // MPU-6050的I2C地址
+const float G = 9.8;
 
 int16_t ACC_X_R, ACC_Y_R, ACC_Z_R, TMP_R, GYR_X_R, GYR_Y_R, GYR_Z_R; // 获取到的原始数据: 加速度+温度+角速度
 
